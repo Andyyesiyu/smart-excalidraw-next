@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Excalidraw - 页面预览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            background: #f9fafb;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        header h1 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        header p {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        button {
+            background: #111827;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        button:hover {
+            background: #1f2937;
+        }
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .left-panel {
+            width: 25%;
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        .tab {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            background: white;
+            color: #111827;
+            border-bottom-color: #111827;
+        }
+        .input-area {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.25rem;
+        }
+        select, textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+        select {
+            margin-bottom: 0.75rem;
+        }
+        textarea {
+            flex: 1;
+            resize: none;
+            margin-top: 0.5rem;
+        }
+        .code-section {
+            flex: 1;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .code-header {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .code-header h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .code-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .code-buttons button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        .btn-clear {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+        }
+        .btn-optimize {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+        .btn-apply {
+            background: #111827;
+        }
+        .code-editor {
+            flex: 1;
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            overflow: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.875rem;
+        }
+        .canvas-area {
+            flex: 1;
+            background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .canvas-placeholder {
+            text-align: center;
+            color: #9ca3af;
+        }
+        .canvas-placeholder h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .canvas-placeholder p {
+            font-size: 0.875rem;
+        }
+        .resizer {
+            width: 4px;
+            background: #e5e7eb;
+            cursor: col-resize;
+            transition: background 0.2s;
+        }
+        .resizer:hover {
+            background: #9ca3af;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .demo-shapes {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .shape {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            border: 2px solid;
+        }
+        .shape-rect {
+            width: 120px;
+            height: 60px;
+            background: #dbeafe;
+            border-color: #1e40af;
+            color: #1e40af;
+            border-radius: 4px;
+        }
+        .shape-ellipse {
+            width: 120px;
+            height: 60px;
+            background: #dcfce7;
+            border-color: #15803d;
+            color: #15803d;
+            border-radius: 50%;
+        }
+        .shape-arrow {
+            width: 100px;
+            height: 2px;
+            background: #1e40af;
+            position: relative;
+        }
+        .shape-arrow::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #1e40af;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div>
+            <h1>Smart Excalidraw</h1>
+            <p>AI 驱动的图表生成</p>
+        </div>
+        <button>⚙️ 管理配置</button>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <!-- Input Area (上半部分) -->
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <!-- Tabs -->
+                <div class="tabs">
+                    <button class="tab active">📝 文本输入</button>
+                    <button class="tab">📁 文件上传</button>
+                    <button class="tab">🖼️ 图片上传</button>
+                </div>
+
+                <!-- Input Form -->
+                <div class="input-area">
+                    <div style="margin-bottom: 0.75rem;">
+                        <label for="chart-type">图表类型</label>
+                        <select id="chart-type">
+                            <option selected>自动</option>
+                            <option>流程图</option>
+                            <option>思维导图</option>
+                            <option>组织架构图</option>
+                            <option>架构图</option>
+                            <option>时序图</option>
+                            <option>其他 18 种...</option>
+                        </select>
+                    </div>
+                    <textarea placeholder="描述您想要创建的图表...&#10;&#10;例如：&#10;- 画一个用户登录流程图&#10;- 创建一个微服务架构图&#10;- 展示项目管理的思维导图"></textarea>
+                    <button style="margin-top: 0.5rem; align-self: flex-end;">发送 ➤</button>
+                </div>
+            </div>
+
+            <!-- Code Section (下半部分) -->
+            <div class="code-section">
+                <div class="code-header">
+                    <h3>生成的代码</h3>
+                    <div class="code-buttons">
+                        <button class="btn-clear">清除</button>
+                        <button class="btn-optimize">✨ 优化</button>
+                        <button class="btn-apply">应用到画布 →</button>
+                    </div>
+                </div>
+                <div class="code-editor">
+                    <pre style="color: #64748b;">// AI 生成的 Excalidraw JSON 代码会显示在这里
+// 支持实时编辑和语法高亮
+
+// 示例代码：
+[
+  {
+    <span style="color: #94a3b8;">"type"</span>: <span style="color: #22c55e;">"rectangle"</span>,
+    <span style="color: #94a3b8;">"x"</span>: <span style="color: #fbbf24;">100</span>,
+    <span style="color: #94a3b8;">"y"</span>: <span style="color: #fbbf24;">100</span>,
+    <span style="color: #94a3b8;">"label"</span>: { <span style="color: #94a3b8;">"text"</span>: <span style="color: #22c55e;">"开始"</span> }
+  }
+]</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resizer -->
+        <div class="resizer"></div>
+
+        <!-- Canvas Area (右侧) -->
+        <div class="canvas-area">
+            <div class="canvas-placeholder">
+                <h2>Excalidraw 画布</h2>
+                <p style="margin-bottom: 2rem;">在左侧输入需求或粘贴代码，图形会在这里显示</p>
+
+                <!-- Demo Shapes -->
+                <div class="demo-shapes">
+                    <div class="shape shape-rect">开始</div>
+                    <div class="shape-arrow"></div>
+                    <div class="shape shape-ellipse">处理</div>
+                </div>
+
+                <p style="margin-top: 2rem; font-size: 0.75rem;">
+                    💡 提示：这是一个交互式画布，生成后可以自由编辑、拖拽和调整
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 简单的交互演示
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
